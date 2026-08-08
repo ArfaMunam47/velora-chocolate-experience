@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+<title>VELORA — Unwrap the Extraordinary</title>
+<meta name="description" content="VELORA — a luxury chocolate experience. Handcrafted, sustainable, unforgettable." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Marcellus&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cocoa-950:#1b100a;
+    --cocoa-900:#241309;
+    --cocoa-850:#2b160c;
+    --espresso:#3a1f12;
+    --cocoa-700:#5a3420;
+    --gold:#c9a15a;
+    --gold-bright:#e6c07a;
+    --cream:#f3e8d8;
+    --beige:#d9c6ab;
+    --beige-soft:#efe3d0;
+    --text-muted:rgba(243,232,216,0.62);
+    --text-faint:rgba(243,232,216,0.4);
+    --line:rgba(230,192,122,0.16);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:auto;}
+  body{
+    margin:0;
+    background:var(--cocoa-950);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    width:100%;
+  }
+  h1,h2,h3,.serif{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    letter-spacing:0.01em;
+  }
+  .display{
+    font-family:'Marcellus', serif;
+  }
+  ::selection{ background:var(--gold); color:var(--cocoa-950); }
+ 
+  #bg-canvas-wrap{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+  }
+  #bg-canvas-wrap canvas{
+    width:100%;
+    height:100%;
+    display:block;
+    pointer-events:auto;
+  }
+ 
+  .grain{
+    position:fixed;
+    inset:0;
+    z-index:5;
+    pointer-events:none;
+    opacity:0.035;
+    mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+ 
+  .vignette{
+    position:fixed;
+    inset:0;
+    z-index:4;
+    pointer-events:none;
+    background:radial-gradient(ellipse at 50% 40%, transparent 40%, rgba(10,5,2,0.55) 100%);
+  }
+ 
+  /* ===== NAV ===== */
+  header{
+    position:fixed;
+    top:0; left:0; right:0;
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px clamp(20px,4vw,56px);
+    background:linear-gradient(to bottom, rgba(20,11,6,0.75) 0%, rgba(20,11,6,0.35) 70%, transparent 100%);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transition:padding 0.4s ease, background 0.4s ease;
+  }
+  header.scrolled{
+    background:rgba(18,10,6,0.82);
+    padding:14px clamp(20px,4vw,56px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Marcellus',serif;
+    font-size:20px;
+    letter-spacing:0.24em;
+    color:var(--cream);
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  .logo-mark{
+    width:26px;height:26px;
+    border-radius:50%;
+    background:conic-gradient(from 180deg, var(--gold), #8a5a2a, var(--gold-bright), var(--gold));
+    flex-shrink:0;
+    box-shadow:0 0 12px rgba(201,161,90,0.5);
+  }
+  nav.links{
+    display:flex;
+    gap:clamp(16px,2.4vw,38px);
+    list-style:none;
+    margin:0; padding:0;
+  }
+  nav.links a{
+    color:var(--text-muted);
+    text-decoration:none;
+    font-size:13px;
+    letter-spacing:0.05em;
+    font-weight:500;
+    position:relative;
+    padding-bottom:4px;
+    transition:color 0.3s ease;
+  }
+  nav.links a::after{
+    content:'';
+    position:absolute;
+    left:0; bottom:0;
+    width:0%; height:1px;
+    background:var(--gold);
+    transition:width 0.3s ease;
+  }
+  nav.links a:hover{ color:var(--cream); }
+  nav.links a:hover::after{ width:100%; }
+ 
+  .nav-right{ display:flex; align-items:center; gap:18px; }
+ 
+  .btn{
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    padding:12px 26px;
+    border-radius:2px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition:transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s ease, background 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    white-space:nowrap;
+  }
+  .btn-gold{
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#1c1006;
+    box-shadow:0 2px 20px rgba(201,161,90,0.25);
+  }
+  .btn-gold:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 28px rgba(201,161,90,0.45);
+  }
+  .btn-gold:active{ transform:translateY(0px) scale(0.98); }
+ 
+  .btn-outline{
+    background:transparent;
+    color:var(--cream);
+    border-color:rgba(243,232,216,0.3);
+  }
+  .btn-outline:hover{
+    border-color:var(--gold);
+    color:var(--gold-bright);
+    transform:translateY(-2px);
+  }
+  .btn-outline:active{ transform:translateY(0px) scale(0.98); }
+ 
+  .btn-ghost{
+    background:transparent;
+    color:var(--cream);
+    padding:10px 16px;
+    font-size:13px;
+  }
+  .btn-ghost:hover{ color:var(--gold-bright); }
+ 
+  .btn:focus-visible{
+    outline:2px solid var(--gold-bright);
+    outline-offset:3px;
+  }
+ 
+  .burger{
+    display:none;
+    width:40px;height:40px;
+    border:1px solid var(--line);
+    border-radius:50%;
+    background:rgba(255,255,255,0.03);
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    flex-direction:column;
+    gap:5px;
+  }
+  .burger span{
+    width:16px;height:1px;background:var(--cream);
+    transition:transform 0.3s ease, opacity 0.3s ease;
+  }
+  .burger.open span:nth-child(1){ transform:translateY(6px) rotate(45deg); }
+  .burger.open span:nth-child(2){ opacity:0; }
+  .burger.open span:nth-child(3){ transform:translateY(-6px) rotate(-45deg); }
+ 
+  .mobile-menu{
+    position:fixed;
+    top:0; right:0;
+    width:min(320px,80vw);
+    height:100vh;
+    background:linear-gradient(160deg, var(--cocoa-900), var(--cocoa-950));
+    z-index:150;
+    padding:100px 32px 40px;
+    transform:translateX(100%);
+    transition:transform 0.45s cubic-bezier(.2,.8,.2,1);
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+    border-left:1px solid var(--line);
+  }
+  .mobile-menu.open{ transform:translateX(0); }
+  .mobile-menu a{
+    color:var(--cream);
+    text-decoration:none;
+    font-family:'Cormorant Garamond',serif;
+    font-size:26px;
+  }
+  .menu-overlay{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.5);
+    z-index:140;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.4s ease;
+  }
+  .menu-overlay.open{ opacity:1; pointer-events:auto; }
+ 
+  /* ===== LAYOUT ===== */
+  main{ position:relative; z-index:10; }
+ 
+  section{
+    position:relative;
+    width:100%;
+  }
+ 
+  .container{
+    max-width:1360px;
+    margin:0 auto;
+    padding-left:clamp(20px,5vw,64px);
+    padding-right:clamp(20px,5vw,64px);
+  }
+ 
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-size:12px;
+    letter-spacing:0.28em;
+    text-transform:uppercase;
+    color:var(--gold-bright);
+    font-weight:600;
+    margin-bottom:22px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:28px; height:1px;
+    background:var(--gold-bright);
+  }
+ 
+  /* ===== HERO ===== */
+  #hero{
+    height:100vh;
+    min-height:680px;
+    display:flex;
+    align-items:center;
+    padding-top:70px;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    align-items:center;
+    gap:20px;
+    width:100%;
+  }
+  .hero-copy{ position:relative; z-index:20; max-width:560px; }
+  .hero-copy h1{
+    font-size:clamp(40px,5.2vw,74px);
+    line-height:1.04;
+    margin:0 0 24px;
+    color:var(--cream);
+    text-shadow:0 4px 40px rgba(0,0,0,0.5);
+  }
+  .hero-copy h1 em{
+    font-style:normal;
+    color:var(--gold-bright);
+  }
+  .hero-copy p{
+    font-size:clamp(15px,1.2vw,18px);
+    line-height:1.7;
+    color:var(--text-muted);
+    margin:0 0 38px;
+    max-width:460px;
+  }
+  .hero-actions{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .hero-product-slot{
+    position:relative;
+    height:100%;
+    min-height:520px;
+  }
+  .scroll-cue{
+    position:absolute;
+    bottom:36px;
+    left:clamp(20px,5vw,64px);
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:var(--text-faint);
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    z-index:20;
+  }
+  .scroll-cue .line{
+    width:1px; height:36px;
+    background:linear-gradient(to bottom, var(--gold-bright), transparent);
+    position:relative;
+    overflow:hidden;
+  }
+  .scroll-cue .line::after{
+    content:'';
+    position:absolute;
+    top:-100%; left:0; width:100%; height:100%;
+    background:var(--gold-bright);
+    animation:scrollDown 1.8s ease-in-out infinite;
+  }
+  @keyframes scrollDown{
+    0%{ top:-100%; }
+    60%{ top:100%; }
+    100%{ top:100%; }
+  }
+ 
+  /* ===== SECTION HEADINGS ===== */
+  .section-head{
+    max-width:640px;
+    margin-bottom:56px;
+    position:relative;
+    z-index:20;
+  }
+  .section-head h2{
+    font-size:clamp(32px,4vw,52px);
+    line-height:1.1;
+    margin:0 0 18px;
+    color:var(--cream);
+  }
+  .section-head p{
+    font-size:16px;
+    line-height:1.75;
+    color:var(--text-muted);
+    max-width:520px;
+  }
+  .center-head{ margin-left:auto; margin-right:auto; text-align:center; }
+  .center-head p{ margin-left:auto; margin-right:auto; }
+ 
+  /* ===== UNWRAP STORY (pinned scroll section) ===== */
+  #unwrap-story{
+    height:400vh;
+    position:relative;
+  }
+  .story-sticky{
+    position:sticky;
+    top:0;
+    height:100vh;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    align-items:center;
+    overflow:hidden;
+  }
+  .story-copy{
+    position:relative;
+    z-index:20;
+    padding-left:clamp(20px,5vw,64px);
+  }
+  .story-step{
+    position:absolute;
+    top:50%;
+    left:clamp(20px,5vw,64px);
+    transform:translateY(-50%);
+    max-width:480px;
+    opacity:0;
+    transition:opacity 0.6s ease, transform 0.6s ease;
+    pointer-events:none;
+  }
+  .story-step.active{
+    opacity:1;
+    transform:translateY(-50%) translateX(0);
+    pointer-events:auto;
+  }
+  .story-step .step-num{
+    font-family:'Marcellus',serif;
+    color:var(--gold);
+    font-size:13px;
+    letter-spacing:0.3em;
+    margin-bottom:16px;
+    display:block;
+  }
+  .story-step h3{
+    font-size:clamp(28px,3.4vw,44px);
+    line-height:1.12;
+    margin:0 0 18px;
+    color:var(--cream);
+  }
+  .story-step p{
+    font-size:16px;
+    line-height:1.75;
+    color:var(--text-muted);
+    max-width:420px;
+  }
+  .story-progress{
+    position:absolute;
+    right:clamp(20px,5vw,64px);
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    z-index:20;
+  }
+  .story-progress .dot{
+    width:8px; height:8px;
+    border-radius:50%;
+    background:rgba(243,232,216,0.2);
+    transition:background 0.4s ease, transform 0.4s ease;
+  }
+  .story-progress .dot.active{
+    background:var(--gold-bright);
+    transform:scale(1.4);
+  }
+ 
+  /* ===== FEATURES ===== */
+  #features{ padding:140px 0 120px; }
+  .feature-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:24px;
+    position:relative;
+    z-index:20;
+  }
+  .feature-card{
+    background:linear-gradient(160deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01));
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:34px 26px;
+    opacity:0;
+    transform:translateY(30px);
+    transition:opacity 0.7s cubic-bezier(.2,.8,.2,1), transform 0.7s cubic-bezier(.2,.8,.2,1), border-color 0.4s ease, background 0.4s ease;
+  }
+  .feature-card.in-view{ opacity:1; transform:translateY(0); }
+  .feature-card:hover{
+    border-color:rgba(201,161,90,0.4);
+    background:linear-gradient(160deg, rgba(201,161,90,0.08), rgba(255,255,255,0.02));
+    transform:translateY(-6px);
+  }
+  .feature-icon{
+    width:44px;height:44px;
+    border-radius:50%;
+    background:rgba(201,161,90,0.12);
+    border:1px solid rgba(201,161,90,0.3);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:22px;
+    color:var(--gold-bright);
+  }
+  .feature-card h3{
+    font-family:'Marcellus',serif;
+    font-size:19px;
+    color:var(--cream);
+    margin:0 0 10px;
+    font-weight:400;
+  }
+  .feature-card p{
+    font-size:14px;
+    line-height:1.65;
+    color:var(--text-muted);
+    margin:0;
+  }
+ 
+  /* ===== INGREDIENTS ===== */
+  #ingredients{ padding:100px 0; }
+  .ingredients-wrap{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:60px;
+    align-items:center;
+  }
+  .ingredient-list{ display:flex; flex-direction:column; gap:0; }
+  .ingredient-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:22px 0;
+    border-bottom:1px solid var(--line);
+    opacity:0;
+    transform:translateX(-20px);
+    transition:opacity 0.6s ease, transform 0.6s ease;
+  }
+  .ingredient-row.in-view{ opacity:1; transform:translateX(0); }
+  .ingredient-row .name{
+    font-family:'Cormorant Garamond',serif;
+    font-size:22px;
+    color:var(--cream);
+  }
+  .ingredient-row .origin{
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gold);
+  }
+  .ingredients-visual{
+    position:relative;
+    aspect-ratio:1/1;
+    border-radius:8px;
+    overflow:hidden;
+    background:radial-gradient(circle at 30% 30%, var(--espresso), var(--cocoa-950));
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .ingredients-visual svg{ width:60%; height:60%; opacity:0.85; }
+ 
+  /* ===== CRAFTSMANSHIP ===== */
+  #craft{ padding:100px 0; }
+  .craft-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:30px;
+  }
+  .craft-card{
+    padding:0;
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity 0.7s ease, transform 0.7s ease;
+  }
+  .craft-card.in-view{ opacity:1; transform:translateY(0); }
+  .craft-num{
+    font-family:'Cormorant Garamond',serif;
+    font-size:60px;
+    color:rgba(201,161,90,0.35);
+    line-height:1;
+    margin-bottom:18px;
+  }
+  .craft-card h3{
+    font-size:22px;
+    color:var(--cream);
+    margin:0 0 12px;
+  }
+  .craft-card p{
+    font-size:14.5px;
+    line-height:1.75;
+    color:var(--text-muted);
+  }
+ 
+  /* ===== COLLECTION ===== */
+  #collection{ padding:120px 0; }
+  .collection-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:28px;
+  }
+  .product-card{
+    background:linear-gradient(165deg, rgba(255,255,255,0.04), rgba(255,255,255,0.008));
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    opacity:0;
+    transform:translateY(30px);
+    transition:opacity 0.7s ease, transform 0.7s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+    display:flex;
+    flex-direction:column;
+  }
+  .product-card.in-view{ opacity:1; transform:translateY(0); }
+  .product-card:hover{
+    border-color:rgba(201,161,90,0.45);
+    box-shadow:0 20px 50px rgba(0,0,0,0.4);
+    transform:translateY(-8px);
+  }
+  .product-visual{
+    height:220px;
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 50% 30%, var(--espresso), var(--cocoa-900));
+    overflow:hidden;
+  }
+  .product-visual canvas{ width:100%!important; height:100%!important; }
+  .product-body{ padding:26px 26px 30px; display:flex; flex-direction:column; gap:12px; flex:1; }
+  .product-body h3{
+    font-family:'Marcellus',serif;
+    font-size:21px;
+    color:var(--cream);
+    margin:0;
+    font-weight:400;
+  }
+  .product-body p{
+    font-size:14px;
+    line-height:1.65;
+    color:var(--text-muted);
+    margin:0;
+    flex:1;
+  }
+  .product-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:8px;
+  }
+  .price{
+    font-family:'Cormorant Garamond',serif;
+    font-size:22px;
+    color:var(--gold-bright);
+  }
+ 
+  /* ===== TESTIMONIALS ===== */
+  #testimonials{ padding:100px 0; }
+  .testi-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:30px;
+  }
+  .testi-card{
+    padding:34px 30px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:rgba(255,255,255,0.02);
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity 0.7s ease, transform 0.7s ease;
+  }
+  .testi-card.in-view{ opacity:1; transform:translateY(0); }
+  .stars{ color:var(--gold-bright); font-size:14px; letter-spacing:2px; margin-bottom:16px; }
+  .testi-card p.quote{
+    font-family:'Cormorant Garamond',serif;
+    font-size:19px;
+    line-height:1.6;
+    color:var(--beige-soft);
+    margin:0 0 22px;
+  }
+  .testi-name{ font-size:13px; color:var(--cream); font-weight:600; }
+  .testi-role{ font-size:12px; color:var(--text-faint); }
+ 
+  /* ===== FINAL CTA ===== */
+  #final-cta{
+    padding:140px 0;
+    text-align:center;
+    position:relative;
+  }
+  .final-cta-inner{
+    max-width:700px;
+    margin:0 auto;
+    position:relative;
+    z-index:20;
+  }
+  .final-cta-inner h2{
+    font-size:clamp(34px,5vw,58px);
+    color:var(--cream);
+    margin:0 0 24px;
+    line-height:1.1;
+  }
+  .final-cta-inner p{
+    font-size:17px;
+    color:var(--text-muted);
+    margin:0 0 42px;
+    line-height:1.7;
+  }
+  .final-actions{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
+ 
+  /* ===== FOOTER ===== */
+  footer{
+    position:relative;
+    z-index:20;
+    border-top:1px solid var(--line);
+    padding:70px 0 30px;
+    background:linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns:1.4fr 1fr 1fr 1fr;
+    gap:40px;
+    margin-bottom:60px;
+  }
+  .footer-brand p{
+    font-size:14px;
+    color:var(--text-muted);
+    line-height:1.7;
+    max-width:280px;
+    margin:18px 0 0;
+  }
+  .footer-col h4{
+    font-size:13px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin:0 0 18px;
+    font-weight:600;
+  }
+  .footer-col a{
+    display:block;
+    color:var(--text-muted);
+    text-decoration:none;
+    font-size:14px;
+    margin-bottom:12px;
+    transition:color 0.3s ease;
+  }
+  .footer-col a:hover{ color:var(--gold-bright); }
+  .footer-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-top:26px;
+    border-top:1px solid var(--line);
+    font-size:12.5px;
+    color:var(--text-faint);
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .footer-social{ display:flex; gap:16px; }
+  .footer-social a{ color:var(--text-muted); text-decoration:none; }
+  .footer-social a:hover{ color:var(--gold-bright); }
+ 
+  /* Contact form (functional) */
+  #contact-form{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    max-width:420px;
+    margin-top:10px;
+  }
+  #contact-form input, #contact-form textarea{
+    background:rgba(255,255,255,0.04);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:13px 16px;
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    resize:none;
+  }
+  #contact-form input:focus, #contact-form textarea:focus{
+    outline:none;
+    border-color:var(--gold);
+  }
+  #contact-form .form-msg{
+    font-size:13px;
+    color:var(--gold-bright);
+    min-height:18px;
+  }
+ 
+  /* Toast for cart / actions */
+  .toast{
+    position:fixed;
+    bottom:28px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--cream);
+    color:var(--cocoa-950);
+    padding:14px 26px;
+    border-radius:4px;
+    font-size:14px;
+    font-weight:600;
+    z-index:300;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.4s ease, transform 0.4s ease;
+    box-shadow:0 10px 40px rgba(0,0,0,0.4);
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+ 
+  .no-webgl-fallback{
+    display:none;
+    align-items:center;
+    justify-content:center;
+    height:100%;
+    width:100%;
+    background:radial-gradient(circle at 50% 40%, var(--espresso), var(--cocoa-950));
+    border-radius:8px;
+  }
+  .no-webgl-fallback .fallback-box{
+    text-align:center;
+    padding:20px;
+  }
+  .no-webgl-fallback svg{ width:80px; height:80px; opacity:0.6; margin-bottom:16px; }
+  .no-webgl-fallback p{ color:var(--text-muted); font-size:13px; }
+ 
+  /* Reveal utility */
+  .reveal{
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity 0.8s cubic-bezier(.2,.8,.2,1), transform 0.8s cubic-bezier(.2,.8,.2,1);
+  }
+  .reveal.in-view{ opacity:1; transform:translateY(0); }
+ 
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 980px){
+    nav.links{ display:none; }
+    .burger{ display:flex; }
+    .hero-grid{ grid-template-columns:1fr; }
+    #hero{ height:auto; min-height:100vh; padding-top:110px; padding-bottom:60px; }
+    .hero-product-slot{ min-height:380px; order:2; margin-top:20px; }
+    .hero-copy{ order:1; max-width:100%; }
+    .hero-copy p{ max-width:100%; }
+    .scroll-cue{ display:none; }
+ 
+    #unwrap-story{ height:auto; }
+    .story-sticky{
+      position:relative;
+      height:auto;
+      grid-template-columns:1fr;
+      padding:60px 0;
+    }
+    .story-copy{ padding-left:0; order:2; }
+    .story-step{
+      position:relative;
+      top:auto; left:auto; transform:none!important;
+      opacity:1!important;
+      pointer-events:auto!important;
+      display:none;
+      padding:0 clamp(20px,5vw,64px);
+      max-width:100%;
+    }
+    .story-step.mobile-active{ display:block; }
+    .story-progress{
+      position:relative;
+      right:auto; top:auto; transform:none;
+      flex-direction:row;
+      justify-content:center;
+      margin-top:30px;
+      order:3;
+    }
+    .hero-product-slot.story-visual{
+      order:1;
+      min-height:340px;
+    }
+ 
+    .feature-grid{ grid-template-columns:repeat(2,1fr); }
+    .ingredients-wrap{ grid-template-columns:1fr; gap:36px; }
+    .craft-grid{ grid-template-columns:1fr; gap:44px; }
+    .collection-grid{ grid-template-columns:1fr; }
+    .testi-grid{ grid-template-columns:1fr; }
+    .footer-grid{ grid-template-columns:1fr 1fr; gap:36px; }
+  }
+ 
+  @media (max-width: 560px){
+    .feature-grid{ grid-template-columns:1fr; }
+    .footer-grid{ grid-template-columns:1fr; }
+    .hero-actions{ flex-direction:column; align-items:stretch; }
+    .final-actions{ flex-direction:column; align-items:stretch; }
+    .btn{ width:100%; }
+    .footer-bottom{ flex-direction:column; text-align:center; }
+  }
+ 
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+ 
+<div id="bg-canvas-wrap"><canvas id="hero-canvas"></canvas></div>
+<div class="vignette"></div>
+<div class="grain"></div>
+ 
+<header id="site-header">
+  <a href="#hero" class="logo"><span class="logo-mark"></span>VELORA</a>
+  <nav class="links">
+    <a href="#story">Story</a>
+    <a href="#product">Product</a>
+    <a href="#ingredients">Ingredients</a>
+    <a href="#experience">Experience</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <div class="nav-right">
+    <button class="btn btn-gold" id="shop-now-btn-desktop" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+    <button class="burger" id="burger-btn" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+ 
+<div class="menu-overlay" id="menu-overlay"></div>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#story">Story</a>
+  <a href="#product">Product</a>
+  <a href="#ingredients">Ingredients</a>
+  <a href="#experience">Experience</a>
+  <a href="#contact">Contact</a>
+  <button class="btn btn-gold" style="margin-top:10px;" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+</div>
+ 
+<main>
+ 
+  <section id="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy reveal in-view">
+        <span class="eyebrow">Maison Velora — Est. Craft Chocolate</span>
+        <h1>Unwrap the<br><em>Extraordinary.</em></h1>
+        <p>A chocolate experience designed to turn every moment into something unforgettable — cast in single-origin cacao, wrapped in quiet luxury.</p>
+        <div class="hero-actions">
+          <button class="btn btn-gold" onclick="document.getElementById('unwrap-story').scrollIntoView({behavior:'smooth'})">Explore the Experience</button>
+          <button class="btn btn-outline" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Discover the Collection</button>
+        </div>
+      </div>
+      <div class="hero-product-slot" id="hero-product-slot"></div>
+    </div>
+    <div class="scroll-cue"><span class="line"></span>Scroll to unwrap</div>
+  </section>
+ 
+  <section id="unwrap-story" aria-label="The Unwrapping Experience">
+    <div class="story-sticky">
+      <div class="story-copy">
+        <div class="story-step active" data-step="0">
+          <span class="step-num">01 — PRESENTATION</span>
+          <h3>Sealed in Silence.</h3>
+          <p>Every VELORA bar begins its journey wrapped in matte foil and pressed cotton paper — a small ritual of anticipation before the first fold gives way.</p>
+        </div>
+        <div class="story-step" data-step="1">
+          <span class="step-num">02 — THE FIRST FOLD</span>
+          <h3>The Wrapper Loosens.</h3>
+          <p>As the foil peels back, light catches the edge of the bar for the first time. The scent of roasted cacao begins to rise.</p>
+        </div>
+        <div class="story-step" data-step="2">
+          <span class="step-num">03 — THE REVEAL</span>
+          <h3>Fully Unveiled.</h3>
+          <p>The wrapping falls completely away, revealing the deep, glossy surface of the chocolate — tempered to a mirror-like sheen.</p>
+        </div>
+        <div class="story-step" data-step="3">
+          <span class="step-num">04 — THE CENTERPIECE</span>
+          <h3>The Chocolate, Alone.</h3>
+          <p>What remains is the product itself — rich, dense, and quietly confident. No packaging left to hide behind.</p>
+        </div>
+      </div>
+      <div class="hero-product-slot story-visual" id="story-product-slot"></div>
+      <div class="story-progress">
+        <span class="dot active" data-dot="0"></span>
+        <span class="dot" data-dot="1"></span>
+        <span class="dot" data-dot="2"></span>
+        <span class="dot" data-dot="3"></span>
+      </div>
+    </div>
+  </section>
+ 
+  <section id="features">
+    <div class="container">
+      <div class="section-head center-head reveal">
+        <span class="eyebrow" style="justify-content:center;">Product Story</span>
+        <h2>Made to be Noticed.</h2>
+        <p>Every detail of VELORA is engineered for the senses — from the weight of the bar in your hand to the way it breaks.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+          </div>
+          <h3>Premium Cocoa</h3>
+          <p>Single-origin beans sourced from micro-farms, fermented and roasted for maximum depth of flavor.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.5 6.5L21 11l-6.5 2.5L12 20l-2.5-6.5L3 11l6.5-2.5z"/></svg>
+          </div>
+          <h3>Handcrafted</h3>
+          <p>Small-batch tempering by master chocolatiers ensures every bar has a consistent, glass-like snap.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg>
+          </div>
+          <h3>Rich Texture</h3>
+          <p>A slow-conched process creates an exceptionally silky mouthfeel with a lingering, complex finish.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11z"/></svg>
+          </div>
+          <h3>Sustainable Packaging</h3>
+          <p>Compostable wrappers and FSC-certified paper, designed with the same care as what's inside.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <section id="ingredients">
+    <div class="container">
+      <div class="ingredients-wrap">
+        <div>
+          <div class="section-head reveal" style="margin-bottom:36px;">
+            <span class="eyebrow">Ingredients</span>
+            <h2>Nothing Hidden. Nothing Wasted.</h2>
+            <p>We disclose every component of our recipe — because transparency is a form of respect.</p>
+          </div>
+          <div class="ingredient-list">
+            <div class="ingredient-row"><span class="name">Criollo Cacao Mass</span><span class="origin">Venezuela</span></div>
+            <div class="ingredient-row"><span class="name">Raw Cane Sugar</span><span class="origin">Mauritius</span></div>
+            <div class="ingredient-row"><span class="name">Cocoa Butter</span><span class="origin">Ecuador</span></div>
+            <div class="ingredient-row"><span class="name">Madagascar Vanilla</span><span class="origin">Madagascar</span></div>
+            <div class="ingredient-row"><span class="name">Sea Salt Flakes</span><span class="origin">Brittany, France</span></div>
+          </div>
+        </div>
+        <div class="ingredients-visual reveal">
+          <svg viewBox="0 0 200 200" fill="none">
+            <circle cx="100" cy="100" r="70" stroke="#c9a15a" stroke-width="1" opacity="0.5"/>
+            <circle cx="100" cy="100" r="50" stroke="#e6c07a" stroke-width="1" opacity="0.7"/>
+            <path d="M100 40 L112 88 L160 100 L112 112 L100 160 L88 112 L40 100 L88 88 Z" fill="#c9a15a" opacity="0.85"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <section id="craft">
+    <div class="container">
+      <div class="section-head center-head reveal">
+        <span class="eyebrow" style="justify-content:center;">Craftsmanship</span>
+        <h2>The Art Behind the Bar.</h2>
+        <p>From bean to bar, every stage is deliberate — a process refined over a decade of obsession.</p>
+      </div>
+      <div class="craft-grid">
+        <div class="craft-card">
+          <div class="craft-num">01</div>
+          <h3>Selective Sourcing</h3>
+          <p>We work directly with a handful of family farms, paying above market rate for beans harvested at peak ripeness.</p>
+        </div>
+        <div class="craft-card">
+          <div class="craft-num">02</div>
+          <h3>Slow Conching</h3>
+          <p>Each batch is conched for 72 hours at controlled temperatures, developing aroma without bitterness.</p>
+        </div>
+        <div class="craft-card">
+          <div class="craft-num">03</div>
+          <h3>Precision Tempering</h3>
+          <p>Hand-tempered in small batches to achieve the signature VELORA snap and mirror-glossed finish.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <section id="product">
+    <div class="container">
+      <div class="section-head center-head reveal">
+        <span class="eyebrow" style="justify-content:center;">Product Collection</span>
+        <h2>Three Expressions of Cacao.</h2>
+        <p>Each bar in the VELORA collection is crafted around a single defining note.</p>
+      </div>
+      <div class="collection-grid" id="collection">
+        <div class="product-card">
+          <div class="product-visual" data-product-color="dark"><canvas class="product-canvas"></canvas></div>
+          <div class="product-body">
+            <h3>Noir Absolu</h3>
+            <p>An intense 85% dark blend with notes of black cherry and roasted hazelnut.</p>
+            <div class="product-footer">
+              <span class="price">$24</span>
+              <button class="btn btn-outline add-to-cart" data-name="Noir Absolu">Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-visual" data-product-color="gold"><canvas class="product-canvas"></canvas></div>
+          <div class="product-body">
+            <h3>Lait Doré</h3>
+            <p>A silken milk chocolate infused with Madagascar vanilla and toasted almond.</p>
+            <div class="product-footer">
+              <span class="price">$22</span>
+              <button class="btn btn-outline add-to-cart" data-name="Lait Doré">Add to Cart</button>
+            </div>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-visual" data-product-color="ruby"><canvas class="product-canvas"></canvas></div>
+          <div class="product-body">
+            <h3>Rubis Sauvage</h3>
+            <p>A naturally pink ruby cacao bar with wild berry brightness and a delicate tartness.</p>
+            <div class="product-footer">
+              <span class="price">$26</span>
+              <button class="btn btn-outline add-to-cart" data-name="Rubis Sauvage">Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <section id="experience">
+    <div class="container">
+      <div class="section-head center-head reveal">
+        <span class="eyebrow" style="justify-content:center;">Testimonials</span>
+        <h2>Words From Our Guests.</h2>
+      </div>
+      <div class="testi-grid">
+        <div class="testi-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"The unwrapping alone feels like an event. I've never paid this much attention to a chocolate bar before."</p>
+          <div class="testi-name">Marguerite L.</div>
+          <div class="testi-role">Paris, France</div>
+        </div>
+        <div class="testi-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"Rubis Sauvage is unlike anything on the market. The tartness is so well balanced against the sweetness."</p>
+          <div class="testi-name">Julian K.</div>
+          <div class="testi-role">New York, USA</div>
+        </div>
+        <div class="testi-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"Sent as a gift and now I order it for myself every month. The packaging is genuinely a keepsake."</p>
+          <div class="testi-name">Amara T.</div>
+          <div class="testi-role">Lagos, Nigeria</div>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <section id="final-cta">
+    <div class="container final-cta-inner">
+      <span class="eyebrow" style="justify-content:center;">Final Invitation</span>
+      <h2>Your First Bar is Waiting.</h2>
+      <p>Join a growing table of guests who've made VELORA part of their most memorable moments.</p>
+      <div class="final-actions">
+        <button class="btn btn-gold" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Shop the Collection</button>
+        <button class="btn btn-outline" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact Us</button>
+      </div>
+    </div>
+  </section>
+ 
+  <footer id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#hero" class="logo"><span class="logo-mark"></span>VELORA</a>
+          <p>A luxury chocolate maison dedicated to slow craft, honest sourcing, and unforgettable unwrapping.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <a href="#story">Story</a>
+          <a href="#product">Product</a>
+          <a href="#ingredients">Ingredients</a>
+          <a href="#experience">Experience</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="#craft">Craftsmanship</a>
+          <a href="#collection">Collection</a>
+          <a href="#final-cta">Shop</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <form id="contact-form">
+            <input type="email" id="contact-email" placeholder="Your email" required />
+            <textarea id="contact-message" rows="3" placeholder="Your message" required></textarea>
+            <button type="submit" class="btn btn-gold" style="width:100%;">Send Message</button>
+            <div class="form-msg" id="form-msg"></div>
+          </form>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2024 VELORA Maison. All rights reserved.</span>
+        <div class="footer-social">
+          <a href="#" aria-label="Instagram">Instagram</a>
+          <a href="#" aria-label="Twitter">Twitter</a>
+          <a href="#" aria-label="Pinterest">Pinterest</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+ 
+</main>
+ 
+<div class="toast" id="toast"></div>
+ 
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="main.js"></script>
+</body>
+</html>
