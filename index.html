@@ -43,19 +43,6 @@
   }
   ::selection{ background:var(--gold); color:var(--cocoa-950); }
  
-  #bg-canvas-wrap{
-    position:fixed;
-    inset:0;
-    z-index:1;
-    pointer-events:none;
-  }
-  #bg-canvas-wrap canvas{
-    width:100%;
-    height:100%;
-    display:block;
-    pointer-events:auto;
-  }
- 
   .grain{
     position:fixed;
     inset:0;
@@ -74,7 +61,97 @@
     background:radial-gradient(ellipse at 50% 40%, transparent 40%, rgba(10,5,2,0.55) 100%);
   }
  
-  /* ===== NAV ===== */
+  /* ===== PRODUCT 3D (pure CSS — no external dependencies) =====
+     A small "cube" system built from real CSS 3D transforms
+     (perspective + preserve-3d + rotateX/Y + translateZ). It
+     needs no library, no network request, and no ES module, so
+     it renders identically whether the page is opened directly
+     as a file or served — no CDN, nothing that can fail to load.
+  */
+  .choc-theme-dark{ --wrap:#1c1008; --wrap-lt:#2c1c10; --foil:#c9a15a; --foil-lt:#e6c07a; --choc:#2a160c; --choc-lt:#4a2c17; --choc-sheen:#6b3a1e; }
+  .choc-theme-gold{ --wrap:#3a2412; --wrap-lt:#4a3220; --foil:#e6c07a; --foil-lt:#f2d79a; --choc:#4a2c17; --choc-lt:#6a4326; --choc-sheen:#9c6a3a; }
+  .choc-theme-ruby{ --wrap:#3a1420; --wrap-lt:#4a2030; --foil:#d98fa0; --foil-lt:#eab2c0; --choc:#5a2030; --choc-lt:#7a3244; --choc-sheen:#b85a72; }
+
+  .choc-stage{
+    position:relative; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    perspective:1400px;
+  }
+  .choc-rig{
+    position:relative; width:0; height:0;
+    transform-style:preserve-3d;
+    will-change:transform;
+  }
+  .choc-shadow{
+    position:absolute; left:50%; bottom:calc(var(--rigH, 40px) * -1.15);
+    transform:translateX(-50%) rotateX(90deg);
+    width:calc(var(--barW, 220px) * 1.25); height:calc(var(--barD, 140px) * 1.05);
+    border-radius:50%;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0.5), rgba(0,0,0,0) 72%);
+    pointer-events:none;
+  }
+
+  /* generic 3-face box: front / top / right, sized via --w/--h/--d */
+  .c3d-box{ position:absolute; left:0; top:0; width:0; height:0; transform-style:preserve-3d; }
+  .c3d-face{ position:absolute; transform-style:preserve-3d; background-size:cover; background-position:center; box-sizing:border-box; }
+  .c3d-face-front{ width:var(--w); height:var(--h); margin-left:calc(var(--w) * -0.5); margin-top:calc(var(--h) * -0.5); transform:translateZ(calc(var(--d) * 0.5)); }
+  .c3d-face-top{ width:var(--w); height:var(--d); margin-left:calc(var(--w) * -0.5); margin-top:calc(var(--d) * -0.5); transform:rotateX(90deg) translateZ(calc(var(--h) * 0.5)); }
+  .c3d-face-right{ width:var(--d); height:var(--h); margin-left:calc(var(--d) * -0.5); margin-top:calc(var(--h) * -0.5); transform:rotateY(90deg) translateZ(calc(var(--w) * 0.5)); }
+
+  /* the chocolate bar itself */
+  .choc-bar .c3d-face-front{
+    background:
+      linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0) 40%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.35) 0 2px, transparent 2px calc(25% - 2px)),
+      linear-gradient(160deg, var(--choc-lt), var(--choc));
+    border-radius:3px;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.05);
+  }
+  .choc-bar .c3d-face-top{ background:linear-gradient(180deg, var(--choc-sheen), var(--choc-lt)); border-radius:3px 3px 0 0; }
+  .choc-bar .c3d-face-right{ background:linear-gradient(180deg, var(--choc), #150b06); border-radius:0 3px 3px 0; }
+
+  /* wrapper: two hinged foil halves + a seal band, all in front of the bar */
+  .choc-wrap-half{
+    position:absolute; top:calc(var(--h) * -0.5); width:calc(var(--w) * 0.5); height:var(--h);
+    background:linear-gradient(160deg, var(--foil-lt), var(--foil) 55%, var(--wrap-lt));
+    box-shadow:inset 0 0 18px rgba(0,0,0,0.25), 0 6px 18px rgba(0,0,0,0.35);
+    border-radius:3px;
+    overflow:hidden;
+    transition:transform 0.05s linear;
+    backface-visibility:hidden;
+  }
+  .choc-wrap-half::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.35) 48%, transparent 66%);
+    background-size:220% 220%;
+    animation:choc-shine 4.5s ease-in-out infinite;
+    mix-blend-mode:overlay;
+  }
+  .choc-wrap-left{ left:calc(var(--w) * -0.5); margin-left:0; transform-origin:right center; }
+  .choc-wrap-right{ left:0; transform-origin:left center; }
+  @keyframes choc-shine{
+    0%, 100%{ background-position:0% 0%; }
+    50%{ background-position:100% 100%; }
+  }
+
+  .choc-band{
+    position:absolute; left:calc(var(--w) * -0.5); top:calc(var(--h) * -0.22);
+    width:var(--w); height:calc(var(--h) * 0.44);
+    background:linear-gradient(180deg, var(--foil-lt), var(--foil));
+    box-shadow:0 4px 14px rgba(0,0,0,0.35);
+    display:flex; align-items:center; justify-content:center;
+    transform:translateZ(2px);
+  }
+  .choc-emblem{
+    width:22%; aspect-ratio:1; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--wrap-lt), var(--wrap));
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.15);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .choc-wrap-half::after{ animation:none; }
+  }
+
   header{
     position:fixed;
     top:0; left:0; right:0;
@@ -450,7 +527,7 @@
   }
  
   /* ===== FEATURES ===== */
-  #features{ padding:140px 0 120px; }
+  #features{ padding:110px 0 100px; }
   .feature-grid{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -603,7 +680,6 @@
     background:radial-gradient(circle at 50% 30%, var(--espresso), var(--cocoa-900));
     overflow:hidden;
   }
-  .product-visual canvas{ width:100%!important; height:100%!important; }
   .product-body{ padding:26px 26px 30px; display:flex; flex-direction:column; gap:12px; flex:1; }
   .product-body h3{
     font-family:'Marcellus',serif;
@@ -632,7 +708,7 @@
   }
  
   /* ===== TESTIMONIALS ===== */
-  #testimonials{ padding:100px 0; }
+  #experience{ padding:100px 0; }
   .testi-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -661,7 +737,7 @@
  
   /* ===== FINAL CTA ===== */
   #final-cta{
-    padding:140px 0;
+    padding:110px 0;
     text-align:center;
     position:relative;
   }
@@ -789,22 +865,6 @@
     transform:translateX(-50%) translateY(0);
   }
  
-  .no-webgl-fallback{
-    display:none;
-    align-items:center;
-    justify-content:center;
-    height:100%;
-    width:100%;
-    background:radial-gradient(circle at 50% 40%, var(--espresso), var(--cocoa-950));
-    border-radius:8px;
-  }
-  .no-webgl-fallback .fallback-box{
-    text-align:center;
-    padding:20px;
-  }
-  .no-webgl-fallback svg{ width:80px; height:80px; opacity:0.6; margin-bottom:16px; }
-  .no-webgl-fallback p{ color:var(--text-muted); font-size:13px; }
- 
   /* Reveal utility */
   .reveal{
     opacity:0;
@@ -875,11 +935,258 @@
   @media (prefers-reduced-motion: reduce){
     *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
   }
+
+  /* ===== VISUALLY HIDDEN ===== */
+  .visually-hidden{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  /* ===== INTRO / LOADING SEQUENCE ===== */
+  html.intro-lock, html.intro-lock body{ overflow:hidden; height:100%; }
+  .intro-overlay{
+    position:fixed; inset:0; z-index:500;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 50% 45%, var(--cocoa-900), var(--cocoa-950) 75%);
+    transition:opacity 0.7s ease, visibility 0.7s ease;
+  }
+  .intro-overlay.intro-hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  .intro-inner{ display:flex; flex-direction:column; align-items:center; gap:22px; }
+  .intro-mark{
+    width:34px; height:34px; border-radius:50%;
+    background:conic-gradient(from 180deg, var(--gold), #8a5a2a, var(--gold-bright), var(--gold));
+    box-shadow:0 0 24px rgba(201,161,90,0.55);
+    opacity:0; transform:scale(0.6);
+    animation:introMarkIn 0.7s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .intro-bar-wrap{
+    position:relative; width:96px; height:34px; perspective:400px;
+  }
+  .intro-bar-core{
+    position:absolute; inset:0;
+    background:linear-gradient(160deg, var(--espresso), #1a0d06);
+    border-radius:3px;
+    box-shadow:inset 0 0 0 1px rgba(201,161,90,0.25);
+    opacity:0;
+    animation:introCoreIn 0.5s ease forwards;
+    animation-delay:1.5s;
+  }
+  .intro-bar-flap{
+    position:absolute; top:0; bottom:0; width:50%;
+    background:linear-gradient(160deg, var(--gold-bright), var(--gold));
+    opacity:0.95;
+  }
+  .intro-bar-flap--l{
+    left:0; border-radius:3px 0 0 3px; transform-origin:left center;
+    animation:introFlapOpenL 0.8s cubic-bezier(.3,.7,.3,1) forwards;
+    animation-delay:0.85s;
+  }
+  .intro-bar-flap--r{
+    right:0; border-radius:0 3px 3px 0; transform-origin:right center;
+    animation:introFlapOpenR 0.8s cubic-bezier(.3,.7,.3,1) forwards;
+    animation-delay:0.95s;
+  }
+  .intro-word{
+    font-family:'Marcellus',serif;
+    font-size:20px;
+    letter-spacing:0.5em;
+    padding-left:0.5em;
+    color:var(--cream);
+    opacity:0;
+    animation:introWordIn 0.8s ease forwards;
+    animation-delay:1.7s;
+  }
+  @keyframes introMarkIn{ to{ opacity:1; transform:scale(1); } }
+  @keyframes introCoreIn{ to{ opacity:1; } }
+  @keyframes introFlapOpenL{ to{ transform:rotateY(-130deg); opacity:0; } }
+  @keyframes introFlapOpenR{ to{ transform:rotateY(130deg); opacity:0; } }
+  @keyframes introWordIn{ to{ opacity:1; } }
+  @media (prefers-reduced-motion: reduce){
+    .intro-mark, .intro-bar-core, .intro-bar-flap, .intro-word{ animation:none !important; opacity:1 !important; transform:none !important; }
+  }
+
+  /* ===== CART BUTTON ===== */
+  .cart-btn{
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    width:40px; height:40px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.03);
+    color:var(--cream);
+    cursor:pointer;
+    transition:border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+  }
+  .cart-btn:hover{ color:var(--gold-bright); border-color:rgba(201,161,90,0.4); }
+  .cart-count{
+    position:absolute; top:-6px; right:-6px;
+    min-width:18px; height:18px; padding:0 4px;
+    border-radius:9px;
+    background:var(--gold-bright);
+    color:#1c1006;
+    font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #mobile-cart-btn{ position:relative; display:flex; align-items:center; justify-content:center; gap:8px; }
+  #mobile-cart-btn .cart-count{ position:static; }
+
+  /* ===== CART DRAWER ===== */
+  .cart-overlay{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(10,5,2,0.55);
+    opacity:0; pointer-events:none;
+    transition:opacity 0.4s ease;
+  }
+  .cart-overlay.open{ opacity:1; pointer-events:auto; }
+  .cart-drawer{
+    position:fixed; top:0; right:0; bottom:0;
+    width:min(400px,92vw);
+    z-index:210;
+    background:linear-gradient(165deg, var(--cocoa-900), var(--cocoa-950));
+    border-left:1px solid var(--line);
+    display:flex; flex-direction:column;
+    transform:translateX(100%);
+    transition:transform 0.45s cubic-bezier(.2,.8,.2,1);
+  }
+  .cart-drawer.open{ transform:translateX(0); }
+  .cart-drawer-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:24px 26px; border-bottom:1px solid var(--line);
+  }
+  .cart-drawer-head h3{ margin:0; font-family:'Marcellus',serif; font-weight:400; font-size:19px; }
+  .cart-close{
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:transparent; border:1px solid var(--line); color:var(--cream);
+    cursor:pointer; transition:border-color 0.3s ease, color 0.3s ease;
+  }
+  .cart-close:hover{ color:var(--gold-bright); border-color:rgba(201,161,90,0.4); }
+  .cart-drawer-body{ flex:1; overflow-y:auto; padding:10px 26px; }
+  .cart-empty{ text-align:center; padding:60px 10px; display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .cart-empty p{ color:var(--text-muted); font-size:14px; margin:0; }
+  .cart-items{ list-style:none; margin:0; padding:0; }
+  .cart-item{
+    display:grid; grid-template-columns:auto 1fr auto; gap:14px;
+    align-items:center; padding:18px 0; border-bottom:1px solid var(--line);
+  }
+  .cart-item-swatch{
+    width:44px; height:44px; border-radius:6px; flex-shrink:0;
+    background:radial-gradient(circle at 35% 30%, var(--gold), var(--espresso));
+  }
+  .cart-item-name{ font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--cream); margin:0 0 4px; }
+  .cart-item-price{ font-size:12.5px; color:var(--text-faint); }
+  .cart-item-qty{ display:flex; align-items:center; gap:10px; margin-top:8px; }
+  .cart-qty-btn{
+    width:24px; height:24px; border-radius:50%; border:1px solid var(--line);
+    background:transparent; color:var(--cream); cursor:pointer; font-size:14px;
+    display:flex; align-items:center; justify-content:center; line-height:1;
+  }
+  .cart-qty-btn:hover{ border-color:var(--gold); color:var(--gold-bright); }
+  .cart-item-remove{
+    justify-self:end; background:none; border:none; color:var(--text-faint);
+    font-size:12px; letter-spacing:0.04em; cursor:pointer; text-decoration:underline;
+    text-underline-offset:2px; padding:0;
+  }
+  .cart-item-remove:hover{ color:var(--gold-bright); }
+  .cart-drawer-foot{ padding:20px 26px 26px; border-top:1px solid var(--line); }
+  .cart-row{ display:flex; justify-content:space-between; font-size:14px; padding:6px 0; color:var(--cream); }
+  .cart-row-muted{ color:var(--text-faint); font-size:12.5px; }
+  .cart-row-total{
+    font-family:'Cormorant Garamond',serif; font-size:20px; color:var(--gold-bright);
+    border-top:1px solid var(--line); margin-top:6px; padding-top:14px;
+  }
+  .cart-checkout-btn{ width:100%; margin-top:14px; }
+
+  /* ===== CHECKOUT ===== */
+  .checkout-section{ padding:120px 0; }
+  .checkout-grid{
+    display:grid; grid-template-columns:1.3fr 1fr; gap:50px;
+    align-items:start;
+  }
+  .checkout-fieldset{ border:none; padding:0; margin:0 0 32px; }
+  .checkout-fieldset legend{
+    font-family:'Marcellus',serif; font-size:16px; color:var(--gold-bright);
+    padding:0; margin-bottom:18px;
+  }
+  .form-field{ margin-bottom:16px; }
+  .form-field-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .form-field label{
+    display:block; font-size:12px; letter-spacing:0.05em; color:var(--text-muted);
+    margin-bottom:7px;
+  }
+  .form-field input{
+    width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--line);
+    border-radius:4px; padding:13px 16px; color:var(--cream);
+    font-family:'Inter',sans-serif; font-size:14px;
+  }
+  .form-field input:focus{ outline:none; border-color:var(--gold); }
+  .form-field input:invalid:not(:placeholder-shown){ border-color:#a8544a; }
+  .checkout-payment-note{
+    font-size:13.5px; line-height:1.7; color:var(--text-muted);
+    background:rgba(255,255,255,0.03); border:1px solid var(--line);
+    border-radius:6px; padding:16px 18px;
+  }
+  .checkout-actions{ display:flex; gap:14px; flex-wrap:wrap; }
+  .checkout-summary{
+    background:rgba(255,255,255,0.03); border:1px solid var(--line);
+    border-radius:8px; padding:26px;
+  }
+  .checkout-summary h3{ margin:0 0 18px; font-family:'Marcellus',serif; font-size:17px; font-weight:400; }
+  .checkout-summary-items{ list-style:none; margin:0 0 16px; padding:0; }
+  .checkout-summary-items li{
+    display:flex; justify-content:space-between; font-size:13.5px;
+    color:var(--text-muted); padding:8px 0; border-bottom:1px solid var(--line);
+  }
+  .checkout-confirmation{ text-align:center; max-width:520px; margin:0 auto; padding:20px 0; }
+  .checkout-confirmation-mark{
+    width:56px; height:56px; border-radius:50%; margin:0 auto 22px;
+    background:rgba(201,161,90,0.12); border:1px solid rgba(201,161,90,0.4);
+    color:var(--gold-bright); font-size:24px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .checkout-confirmation h3{ font-size:28px; margin:0 0 14px; color:var(--cream); }
+  .checkout-confirmation p{ color:var(--text-muted); line-height:1.7; margin:0 0 30px; }
+
+  @media (max-width:900px){
+    .checkout-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width:560px){
+    .form-field-row{ grid-template-columns:1fr; }
+    .cart-drawer{ width:100vw; }
+  }
 </style>
 </head>
 <body>
  
-<div id="bg-canvas-wrap"><canvas id="hero-canvas"></canvas></div>
+<div id="intro-overlay" class="intro-overlay" role="status" aria-live="polite">
+  <div class="intro-inner">
+    <div class="intro-mark" aria-hidden="true"></div>
+    <div class="intro-bar-wrap" aria-hidden="true">
+      <div class="intro-bar-flap intro-bar-flap--l"></div>
+      <div class="intro-bar-flap intro-bar-flap--r"></div>
+      <div class="intro-bar-core"></div>
+    </div>
+    <div class="intro-word">VELORA</div>
+    <span class="visually-hidden">Loading the VELORA chocolate experience</span>
+  </div>
+</div>
+<script>
+  // Absolute last-resort safety net, independent of every other script on
+  // the page: if the intro overlay is somehow still showing 4 seconds after
+  // the page's own HTML has parsed, force it away so nothing can get stuck
+  // behind it. site.js normally dismisses the overlay well before this.
+  (function () {
+    setTimeout(function () {
+      var overlay = document.getElementById('intro-overlay');
+      if (overlay && !overlay.classList.contains('intro-hide')) {
+        overlay.classList.add('intro-hide');
+        overlay.style.display = 'none';
+      }
+      document.documentElement.classList.remove('intro-lock');
+    }, 4000);
+  })();
+</script>
+ 
 <div class="vignette"></div>
 <div class="grain"></div>
  
@@ -893,6 +1200,10 @@
     <a href="#contact">Contact</a>
   </nav>
   <div class="nav-right">
+    <button class="cart-btn" id="cart-btn" aria-label="Open cart" aria-haspopup="dialog" aria-controls="cart-drawer">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L21.2 8H6"/><circle cx="10" cy="21" r="1.4"/><circle cx="18" cy="21" r="1.4"/></svg>
+      <span class="cart-count" id="cart-count" hidden>0</span>
+    </button>
     <button class="btn btn-gold" id="shop-now-btn-desktop" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Shop Now</button>
     <button class="burger" id="burger-btn" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -907,8 +1218,32 @@
   <a href="#ingredients">Ingredients</a>
   <a href="#experience">Experience</a>
   <a href="#contact">Contact</a>
-  <button class="btn btn-gold" style="margin-top:10px;" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+  <button class="btn btn-outline" id="mobile-cart-btn">View Cart<span class="cart-count" id="cart-count-mobile" hidden>0</span></button>
+  <button class="btn btn-gold" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Shop Now</button>
 </div>
+ 
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-label="Shopping cart" inert>
+  <div class="cart-drawer-head">
+    <h3>Your Bag</h3>
+    <button class="cart-close" id="cart-close" aria-label="Close cart">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5l14 14M19 5L5 19"/></svg>
+    </button>
+  </div>
+  <div class="cart-drawer-body">
+    <div class="cart-empty" id="cart-empty">
+      <p>Your bag is empty.</p>
+      <button class="btn btn-outline" id="cart-empty-shop-btn">Browse the Collection</button>
+    </div>
+    <ul class="cart-items" id="cart-items"></ul>
+  </div>
+  <div class="cart-drawer-foot" id="cart-drawer-foot" hidden>
+    <div class="cart-row"><span>Subtotal</span><span id="cart-subtotal">$0</span></div>
+    <div class="cart-row cart-row-muted"><span>Shipping</span><span id="cart-shipping">Calculated at checkout</span></div>
+    <div class="cart-row cart-row-total"><span>Total</span><span id="cart-total">$0</span></div>
+    <button class="btn btn-gold cart-checkout-btn" id="cart-checkout-btn">Proceed to Checkout</button>
+  </div>
+</aside>
  
 <main>
  
@@ -1066,35 +1401,35 @@
       </div>
       <div class="collection-grid" id="collection">
         <div class="product-card">
-          <div class="product-visual" data-product-color="dark"><canvas class="product-canvas"></canvas></div>
+          <div class="product-visual" data-product-color="dark"></div>
           <div class="product-body">
             <h3>Noir Absolu</h3>
             <p>An intense 85% dark blend with notes of black cherry and roasted hazelnut.</p>
             <div class="product-footer">
               <span class="price">$24</span>
-              <button class="btn btn-outline add-to-cart" data-name="Noir Absolu">Add to Cart</button>
+              <button class="btn btn-outline add-to-cart" data-name="Noir Absolu" data-price="24">Add to Cart</button>
             </div>
           </div>
         </div>
         <div class="product-card">
-          <div class="product-visual" data-product-color="gold"><canvas class="product-canvas"></canvas></div>
+          <div class="product-visual" data-product-color="gold"></div>
           <div class="product-body">
             <h3>Lait Doré</h3>
             <p>A silken milk chocolate infused with Madagascar vanilla and toasted almond.</p>
             <div class="product-footer">
               <span class="price">$22</span>
-              <button class="btn btn-outline add-to-cart" data-name="Lait Doré">Add to Cart</button>
+              <button class="btn btn-outline add-to-cart" data-name="Lait Doré" data-price="22">Add to Cart</button>
             </div>
           </div>
         </div>
         <div class="product-card">
-          <div class="product-visual" data-product-color="ruby"><canvas class="product-canvas"></canvas></div>
+          <div class="product-visual" data-product-color="ruby"></div>
           <div class="product-body">
             <h3>Rubis Sauvage</h3>
             <p>A naturally pink ruby cacao bar with wild berry brightness and a delicate tartness.</p>
             <div class="product-footer">
               <span class="price">$26</span>
-              <button class="btn btn-outline add-to-cart" data-name="Rubis Sauvage">Add to Cart</button>
+              <button class="btn btn-outline add-to-cart" data-name="Rubis Sauvage" data-price="26">Add to Cart</button>
             </div>
           </div>
         </div>
@@ -1139,6 +1474,70 @@
       <div class="final-actions">
         <button class="btn btn-gold" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Shop the Collection</button>
         <button class="btn btn-outline" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact Us</button>
+      </div>
+    </div>
+  </section>
+ 
+  <section id="checkout" class="checkout-section" hidden>
+    <div class="container">
+      <div class="section-head reveal in-view">
+        <span class="eyebrow">Checkout</span>
+        <h2>Complete Your Order.</h2>
+        <p>Review your bag, tell us where to send it, and place your order.</p>
+      </div>
+      <div class="checkout-grid" id="checkout-form-view">
+        <form class="checkout-form" id="checkout-form" novalidate>
+          <fieldset class="checkout-fieldset">
+            <legend>Contact &amp; Shipping</legend>
+            <div class="form-field">
+              <label for="co-name">Full name</label>
+              <input type="text" id="co-name" name="name" autocomplete="name" required />
+            </div>
+            <div class="form-field">
+              <label for="co-email">Email</label>
+              <input type="email" id="co-email" name="email" autocomplete="email" required />
+            </div>
+            <div class="form-field">
+              <label for="co-address">Street address</label>
+              <input type="text" id="co-address" name="address" autocomplete="street-address" required />
+            </div>
+            <div class="form-field-row">
+              <div class="form-field">
+                <label for="co-city">City</label>
+                <input type="text" id="co-city" name="city" autocomplete="address-level2" required />
+              </div>
+              <div class="form-field">
+                <label for="co-postal">Postal code</label>
+                <input type="text" id="co-postal" name="postal" autocomplete="postal-code" required />
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="co-country">Country</label>
+              <input type="text" id="co-country" name="country" autocomplete="country-name" required />
+            </div>
+          </fieldset>
+          <fieldset class="checkout-fieldset">
+            <legend>Payment</legend>
+            <p class="checkout-payment-note">This is a demonstration checkout — no payment is processed and no card details are collected. A production build of Velora would connect a provider such as Stripe or PayPal here.</p>
+          </fieldset>
+          <div class="checkout-actions">
+            <button type="button" class="btn btn-outline" id="checkout-back-btn">Back to Bag</button>
+            <button type="submit" class="btn btn-gold" id="checkout-submit-btn">Place Order</button>
+          </div>
+        </form>
+        <div class="checkout-summary">
+          <h3>Order Summary</h3>
+          <ul class="checkout-summary-items" id="checkout-summary-items"></ul>
+          <div class="cart-row"><span>Subtotal</span><span id="checkout-subtotal">$0</span></div>
+          <div class="cart-row cart-row-muted"><span>Shipping</span><span id="checkout-shipping">Free</span></div>
+          <div class="cart-row cart-row-total"><span>Total</span><span id="checkout-total">$0</span></div>
+        </div>
+      </div>
+      <div class="checkout-confirmation" id="checkout-confirmation" hidden>
+        <div class="checkout-confirmation-mark">✓</div>
+        <h3>Order Confirmed.</h3>
+        <p>Thank you<span id="confirm-name"></span> — your order <strong id="confirm-order-id"></strong> is being prepared. A confirmation has been sent to <span id="confirm-email"></span>.</p>
+        <button class="btn btn-gold" id="checkout-continue-btn">Continue Shopping</button>
       </div>
     </div>
   </section>
@@ -1188,14 +1587,8 @@
  
 <div class="toast" id="toast"></div>
  
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
-<script type="module" src="main.js"></script>
+<script src="site.js"></script>
+<script src="main.js"></script>
+<script src="cart.js"></script>
 </body>
 </html>
